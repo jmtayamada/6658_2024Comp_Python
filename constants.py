@@ -2,16 +2,17 @@ from rev import CANSparkBase as CSB
 from wpimath.units import inchesToMeters
 from wpimath.kinematics import SwerveDrive4Kinematics
 from wpimath.geometry import Translation2d
+from math import pi
 
 class SwerveModuleConstants():
-    turningP = 1
+    turningP = 0.0002
     turningI = 0
     turningD = 0
-    drivingPosFactor = 1.0
-    drivingVelFactor = drivingPosFactor * 60.0
+    drivingPosFactor = 1.0 * .1 * pi   # motor to wheel conversion factor * circumference, meters
+    drivingVelFactor = drivingPosFactor * 60.0  # meters per second
     turnEncoderMin = 0.0
     turnEncoderMax = 360.0
-    drivingP = 1
+    drivingP = .002
     drivingI = 0
     drivingD = 0
     drivingMinOutput = -1.0
@@ -47,7 +48,7 @@ class DriveConstants():
         Translation2d(-halfWheelBase, -halfTrackWidth),
     )
     
-    MaxSpeed = 5.0
+    MaxSpeed = 5.0  # meters per second
     
 class IntakeConstants():
     angleID = 4
