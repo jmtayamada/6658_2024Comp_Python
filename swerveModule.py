@@ -29,6 +29,8 @@ class SwerveModule():
         self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
         
+        self.drivingMotorOutput = 0
+        
         # self.driveReversal = reversedDrive
         
     def getCurrentRotation(self) -> Rotation2d:
@@ -52,9 +54,8 @@ class SwerveModule():
                 optimizedDesiredState.angle.radians()
             )
         )
-        self.drivingSparkMax.set(
-            self.drivingPIDController.calculate(
-                self.drivingEncoder.getVelocity(),
-                optimizedDesiredState.speed
-            )
+        self.drivingMotorOutput += self.drivingPIDController.calculate(
+            self.drivingEncoder.getVelocity(),
+            optimizedDesiredState.speed
         )
+        self.drivingSparkMax.set(self.drivingMotorOutput)
