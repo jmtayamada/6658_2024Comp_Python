@@ -23,22 +23,31 @@ class Robot(TimedRobot):
         self.PID = PIDController(s.drivingP, s.drivingI, s.drivingD)
         
         self.testVelocity = 0
+        self.targetVelocity = 0
         
     def teleopPeriodic(self) -> None:
         pass
         # self.drive.driveFieldRelative(ChassisSpeeds(self.driveStick.getRawAxis(0), self.driveStick.getRawAxis(1), self.driveStick.getRawAxis(2)))
         
+    def testInit(self) -> None:
+        self.testEncoder.setPosition(0)
+        
     def testPeriodic(self) -> None:
         self.testMotor.set(self.driveStick.getRawAxis(1))
         SmartDashboard.putNumber("motor velocity", self.testEncoder.getVelocity())
         SmartDashboard.putNumber("motor position", self.testEncoder.getPosition())
+        
+        self.targetVelocity += self.driveStick.getRawAxis(1) / 100
+        
+        if self.targetVelocity > s.drivingMaxOutput:
+            self.targetVelocity = s.drivingMaxOutput
 
-        # self.testVelocity += self.PID.calculate(
-        #     self.testEncoder.getVelocity(),
-        #     self.driveStick.getRawAxis(1) * d.MaxSpeed
-        # )
-        # if self.testVelocity > 1:
-        #     self.testVelocity = 1
-        # if self.testVelocity < -1:
-        #     self.testVelocity = -1
-        # self.testMotor.set(self.testVelocity)
+        self.testVelocity += self.PID.calculate(
+            self.testEncoder.getVelocity(),
+            self.targetVelocity
+        )
+        if self.testVelocity > 1:
+            self.testVelocity = 1
+        if self.testVelocity < -1:
+            self.testVelocity = -1
+        self.testMotor.set(self.testVelocity)
