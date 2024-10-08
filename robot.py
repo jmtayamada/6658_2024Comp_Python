@@ -1,53 +1,22 @@
-from wpilib import TimedRobot, Joystick, SmartDashboard
+from wpilib import TimedRobot, Joystick
 from swerveDrive import SwerveDrive
 from constants import robotConstants as c
 from wpimath.kinematics import ChassisSpeeds
-from wpimath.controller import PIDController
-from rev import CANSparkMax, SparkMaxAbsoluteEncoder, SparkMaxRelativeEncoder, CANSparkLowLevel
-import numpy as np
-import math
 
-from constants import SwerveModuleConstants as s
 from constants import DriveConstants as d
-
+from math import pow
 
 class Robot(TimedRobot):
     
     def robotInit(self) -> None:
-        # self.drive = SwerveDrive()
+        self.drive = SwerveDrive()
         self.driveStick = Joystick(c.joystickID)
-        self.testMotor = CANSparkMax(4, CANSparkLowLevel.MotorType.kBrushless)
-        self.testEncoder: SparkMaxRelativeEncoder = self.testMotor.getEncoder()
-        self.testEncoder.setPositionConversionFactor(s.drivingPosFactor)
-        self.testEncoder.setVelocityConversionFactor(s.drivingVelFactor)
-        self.PID = PIDController(s.drivingP, s.drivingI, s.drivingD)
-        
-        self.testVelocity = 0
-        self.targetVelocity = 0
         
     def teleopPeriodic(self) -> None:
-        pass
-        # self.drive.driveFieldRelative(ChassisSpeeds(self.driveStick.getRawAxis(0), self.driveStick.getRawAxis(1), self.driveStick.getRawAxis(2)))
+        self.drive.driveFieldRelative(ChassisSpeeds(pow(self.driveStick.getRawAxis(0), 2), pow(self.driveStick.getRawAxis(1), 2), pow(self.driveStick.getRawAxis(4), 2)))
         
     def testInit(self) -> None:
-        self.testEncoder.setPosition(0)
+        pass
         
     def testPeriodic(self) -> None:
-        self.testMotor.set(self.driveStick.getRawAxis(1))
-        SmartDashboard.putNumber("motor velocity", self.testEncoder.getVelocity())
-        SmartDashboard.putNumber("motor position", self.testEncoder.getPosition())
-        
-        self.targetVelocity += self.driveStick.getRawAxis(1) / 100
-        
-        if self.targetVelocity > s.drivingMaxOutput:
-            self.targetVelocity = s.drivingMaxOutput
-
-        self.testVelocity += self.PID.calculate(
-            self.testEncoder.getVelocity(),
-            self.targetVelocity
-        )
-        if self.testVelocity > 1:
-            self.testVelocity = 1
-        if self.testVelocity < -1:
-            self.testVelocity = -1
-        self.testMotor.set(self.testVelocity)
+        pass

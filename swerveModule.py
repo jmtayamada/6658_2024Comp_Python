@@ -5,7 +5,7 @@ from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from wpimath.controller import PIDController
 from constants import SwerveModuleConstants as c
 
-class SwerveModule():
+class SwerveModule:
     
     def __init__(self, drivingCANId: int, turningCANId: int, encoderNum: int, reversedDrive: bool, reversedSteer: bool) -> None:
         self.drivingSparkMax = CANSparkMax(drivingCANId, CANSparkLowLevel.MotorType.kBrushless)
@@ -41,21 +41,29 @@ class SwerveModule():
         self.turningEncoder.set_position(0.0)
                 
     def getState(self) -> SwerveModuleState:
-        return SwerveModuleState(self.drivingEncoder.getVelocity, self.getCurrentRotation())
+        return SwerveModuleState(self.drivingEncoder.getVelocity(), self.getCurrentRotation())
         
     def getPosition(self) -> SwerveModulePosition:
         return SwerveModulePosition(self.drivingEncoder.getPosition(),self.getCurrentRotation())
 
     def setDesiredState(self, desiredState: SwerveModuleState):
         optimizedDesiredState = SwerveModuleState.optimize(desiredState, self.getCurrentRotation())
+        
+        # turning
         self.turningSparkMax.set(
             -self.turningPIDController.calculate(
                 self.getCurrentRotation().radians(), 
                 optimizedDesiredState.angle.radians()
             )
         )
+
         self.drivingMotorOutput += self.drivingPIDController.calculate(
-            self.drivingEncoder.getVelocity(),
+            self.getState().speed,
             optimizedDesiredState.speed
         )
+        if self.drivingMotorOutput > 1:
+            self.drivingMotorOutput = 1
+        if self.drivingMotorOutput < -1:
+            self.drivingMotorOutput = -1
         self.drivingSparkMax.set(self.drivingMotorOutput)
+

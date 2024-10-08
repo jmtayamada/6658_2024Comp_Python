@@ -7,14 +7,14 @@ from wpimath.geometry import Rotation2d, Pose2d
 # from pathplannerlib.auto import AutoBuilder
 # from pathplannerlib.config import ReplanningConfig, HolonomicPathFollowerConfig, PIDConstants
 
-class SwerveDrive():
+class SwerveDrive:
     
     def __init__(self) -> None:
-        self.moduleFL = SwerveModule(c.FLDrivingCAN, c.FLTurningCAN, c.FLEncoderCAN, False, False)
+        self.moduleFL = SwerveModule(c.FLDrivingCAN, c.FLTurningCAN, c.FLEncoderCAN, True, False)
         self.moduleFR = SwerveModule(c.FRDrivingCAN, c.FRTurningCAN, c.FREncoderCAN, False, False)
         self.moduleRL = SwerveModule(c.RLDrivingCAN, c.RLTurningCAN, c.RLEncoderCAN, False, False)
         self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, False, False)
-                
+        
         self.gyro = Pigeon2(c.PigeonGyro)
                 
         self.odometry = SwerveDrive4Odometry(

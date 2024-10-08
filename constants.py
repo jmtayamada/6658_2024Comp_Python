@@ -5,15 +5,15 @@ from wpimath.geometry import Translation2d
 from math import pi
 
 class SwerveModuleConstants():
-    turningP = 0.0002
+    turningP = 0.16
     turningI = 0
-    turningD = 0
+    turningD = 0.008
     wheelDiameter = .09
     drivingPosFactor = (.09 * pi) / 6.75  # motor to wheel conversion factor * circumference, meters
-    drivingVelFactor = drivingPosFactor * 60.0  # meters per second
+    drivingVelFactor = drivingPosFactor / 60.0  # meters per second
     turnEncoderMin = 0.0
     turnEncoderMax = 360.0
-    drivingP = .002
+    drivingP = .04
     drivingI = 0
     drivingD = 0
     drivingMinOutput = -1.0
@@ -22,25 +22,25 @@ class SwerveModuleConstants():
     turningIdleMode = CSB.IdleMode.kBrake
     
 class DriveConstants():
-    FLDrivingCAN = 0
-    FRDrivingCAN = 1
-    RLDrivingCAN = 2
-    RRDrivingCAN = 3
+    FLDrivingCAN = 6
+    FRDrivingCAN = 8
+    RLDrivingCAN = 4
+    RRDrivingCAN = 2
 
-    FLTurningCAN = 4
-    FRTurningCAN = 5
-    RLTurningCAN = 6
-    RRTurningCAN = 7
+    FLTurningCAN = 5
+    FRTurningCAN = 7
+    RLTurningCAN = 3
+    RRTurningCAN = 1
 
-    FLEncoderCAN = 8
-    FREncoderCAN = 9
+    FLEncoderCAN = 13
+    FREncoderCAN = 12
     RLEncoderCAN = 10
     RREncoderCAN = 11
 
-    PigeonGyro = 12
+    PigeonGyro = 14
     
-    halfTrackWidth = inchesToMeters(28)/2
-    halfWheelBase = inchesToMeters(28)/2
+    halfTrackWidth = inchesToMeters(58)/2
+    halfWheelBase = inchesToMeters(58)/2
     
     kinematics = SwerveDrive4Kinematics(
         Translation2d(halfWheelBase, halfTrackWidth),
@@ -49,12 +49,12 @@ class DriveConstants():
         Translation2d(-halfWheelBase, -halfTrackWidth),
     )
     
-    MaxSpeed = 5.0  # meters per second
+    MaxSpeed = 2.0  # 3.8 meters per second
     
 class IntakeConstants():
-    angleID = 4
-    powerID = 5
-    encoderID = 6
+    angleID = 21
+    powerID = 22
+    encoderID = 23
     pitchP = 1
     pitchI = 0
     pitchD = 0
