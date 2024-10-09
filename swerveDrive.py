@@ -3,6 +3,7 @@ from constants import DriveConstants as c
 from phoenix6.hardware import Pigeon2
 from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds, SwerveModuleState
 from wpimath.geometry import Rotation2d, Pose2d
+from ntcore import NetworkTableInstance
 
 # from pathplannerlib.auto import AutoBuilder
 # from pathplannerlib.config import ReplanningConfig, HolonomicPathFollowerConfig, PIDConstants
@@ -15,7 +16,11 @@ class SwerveDrive:
         self.moduleRL = SwerveModule(c.RLDrivingCAN, c.RLTurningCAN, c.RLEncoderCAN, False, False)
         self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, False, False)
         
+        self.swerveModuleArray = [self.moduleFL, self.moduleFR, self.moduleRL, self.moduleRR]
+        
         self.gyro = Pigeon2(c.PigeonGyro)
+        
+        self.publishStates()
                 
         self.odometry = SwerveDrive4Odometry(
             c.kinematics,
@@ -28,6 +33,10 @@ class SwerveDrive:
             ),
             Pose2d()
         )
+        
+    def publishStates(self):
+        self.RedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Red", self.swerveModuleArray).publish()
+        self.BluePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Blue", self.swerveModuleArray).publish()
         
     def getHeading(self) -> Rotation2d:
         return Rotation2d.fromDegrees(self.gyro.get_yaw().value_as_double)
