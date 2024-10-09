@@ -14,6 +14,8 @@ class Robot(TimedRobot):
         
     def teleopPeriodic(self) -> None:
         self.drive.driveFieldRelative(ChassisSpeeds(pow(self.driveStick.getRawAxis(0), 2), pow(self.driveStick.getRawAxis(1), 2), pow(self.driveStick.getRawAxis(4), 2)))
+        if self.driveStick.getRawButtonPressed(1):
+            self.drive.zeroHeading()
         
     def testInit(self) -> None:
         pass

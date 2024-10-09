@@ -12,7 +12,7 @@ class SwerveModuleConstants():
     drivingPosFactor = (.09 * pi) / 6.75  # motor to wheel conversion factor * circumference, meters
     drivingVelFactor = drivingPosFactor / 60.0  # meters per second
     turnEncoderMin = 0.0
-    turnEncoderMax = 360.0
+    turnEncoderMax = 2 * pi
     drivingP = .04
     drivingI = 0
     drivingD = 0
