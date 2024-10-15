@@ -7,13 +7,21 @@ from constants import DriveConstants as d
 from math import pow
 
 class Robot(TimedRobot):
+
+
+    def getJoystickDeadbanded(self, axis: int) -> float:
+        rawAxis = self.driveStick.getRawAxis(axis)
+        if(abs(rawAxis) <= d.deadband):
+            return 0
+        else:
+            return rawAxis
     
     def robotInit(self) -> None:
         self.drive = SwerveDrive()
         self.driveStick = Joystick(c.joystickID)
         
     def teleopPeriodic(self) -> None:
-        self.drive.driveFieldRelative(ChassisSpeeds(pow(self.driveStick.getRawAxis(0), 2), pow(self.driveStick.getRawAxis(1), 2), pow(self.driveStick.getRawAxis(4), 2)))
+        self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadbanded(1), -self.getJoystickDeadbanded(0), -self.getJoystickDeadbanded(4)))
         if self.driveStick.getRawButtonPressed(1):
             self.drive.zeroHeading()
         

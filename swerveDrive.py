@@ -1,7 +1,8 @@
 from swerveModule import SwerveModule
 from constants import DriveConstants as c
 from phoenix6.hardware import Pigeon2
-from wpimath.kinematics import SwerveDrive4Odometry, ChassisSpeeds, SwerveModuleState
+from wpimath.kinematics import ChassisSpeeds, SwerveModuleState, SwerveModulePosition
+from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Rotation2d, Pose2d
 from ntcore import NetworkTableInstance
 
@@ -15,6 +16,10 @@ class SwerveDrive:
         self.moduleFR = SwerveModule(c.FRDrivingCAN, c.FRTurningCAN, c.FREncoderCAN, False, False)
         self.moduleRL = SwerveModule(c.RLDrivingCAN, c.RLTurningCAN, c.RLEncoderCAN, False, False)
         self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, False, False)
+
+        #
+        self.lastDesiredSpeedFL = 0
+        self.controlArray = []
         
         self.swerveModuleArray = [self.moduleFL, self.moduleFR, self.moduleRL, self.moduleRR]
         
@@ -22,7 +27,7 @@ class SwerveDrive:
         
         self.publishStates()
                 
-        self.odometry = SwerveDrive4Odometry(
+        self.odometry = SwerveDrive4PoseEstimator(
             c.kinematics,
             self.getHeading(),
             (
@@ -35,14 +40,25 @@ class SwerveDrive:
         )
         
     def publishStates(self):
-        self.RedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Red", self.swerveModuleArray).publish()
-        self.BluePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Blue", self.swerveModuleArray).publish()
+        self.OdometryPublisher = NetworkTableInstance.getDefault().getStructTopic("/SwerveStates/Odometry", Pose2d).publish()
+        self.RedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Red", SwerveModuleState).publish()
+
+    def updateStates(self):
+        self.RedPublisher.set(self.getModuleStates())
+        self.OdometryPublisher.set(self.odometry.getEstimatedPosition())
         
     def getHeading(self) -> Rotation2d:
         return Rotation2d.fromDegrees(self.gyro.get_yaw().value_as_double)
     
+    def getModuleStates(self):
+        return [self.moduleFL.getState(), self.moduleFR.getState(), self.moduleRL.getState(), self.moduleRR.getState()]
+    
+    def getModulePositions(self):
+        return [self.moduleFL.getPosition(), self.moduleFR.getPosition(), self.moduleRL.getPosition(), self.moduleRR.getPosition()]
+    
     def zeroHeading(self):
         self.gyro.set_yaw(0)
+        self.odometry.resetPosition(self.getHeading(), self.getModulePositions(), Pose2d())
         
     def resetEncoders(self):
         self.moduleFL.resetEncoders()
@@ -65,8 +81,15 @@ class SwerveDrive:
                 self.moduleRR.getPosition()
             )
         )
+        self.updateStates()
+        if len(self.controlArray) <= 100000:
+            self.controlArray.append((self.lastDesiredSpeedFL, self.moduleFL.drivingEncoder.getVelocity()))
+        self.lastDesiredSpeedFL = desiredStates[0].speed
+
+
         
     def driveFieldRelative(self, chassisSpeeds: ChassisSpeeds):
+
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, self.getHeading())
         moduleStates = c.kinematics.toSwerveModuleStates(speeds)
         self.setModuleStates(moduleStates)

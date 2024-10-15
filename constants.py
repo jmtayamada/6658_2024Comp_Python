@@ -15,13 +15,14 @@ class SwerveModuleConstants():
     turnEncoderMax = 2 * pi
     drivingP = .04
     drivingI = 0
-    drivingD = 0
+    drivingD = .008
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     drivingIdleMode = CSB.IdleMode.kBrake
     turningIdleMode = CSB.IdleMode.kBrake
     
 class DriveConstants():
+    deadband = 0.07
     FLDrivingCAN = 6
     FRDrivingCAN = 8
     RLDrivingCAN = 4
