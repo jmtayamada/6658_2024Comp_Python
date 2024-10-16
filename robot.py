@@ -15,7 +15,7 @@ class Robot(TimedRobot):
             return 0
         else:
             rawAxis -= d.deadband * copysign(1, rawAxis)
-            rawAxis *= 1/d.deadband
+            rawAxis *= 1/(1-d.deadband)
             return rawAxis
     
     def robotInit(self) -> None:
