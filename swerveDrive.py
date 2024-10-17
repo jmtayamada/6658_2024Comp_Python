@@ -5,6 +5,11 @@ from wpimath.kinematics import ChassisSpeeds, SwerveModuleState, SwerveModulePos
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Rotation2d, Pose2d
 from ntcore import NetworkTableInstance
+from wpilib import DriverStation
+
+from pathplannerlib.auto import AutoBuilder
+from pathplannerlib.controller import PPHolonomicDriveController
+from pathplannerlib.config import RobotConfig, PIDConstants
 
 # from pathplannerlib.auto import AutoBuilder
 # from pathplannerlib.config import ReplanningConfig, HolonomicPathFollowerConfig, PIDConstants
@@ -39,6 +44,31 @@ class SwerveDrive:
             Pose2d()
         )
         
+        # Load the RobotConfig from the GUI settings. You should probably
+        # store this in your Constants file
+        config = RobotConfig.fromGUISettings()
+
+        # Configure the AutoBuilder last
+        AutoBuilder.configureHolonomic(
+            self.getPose, # Robot pose supplier
+            self.resetPose, # Method to reset odometry (will be called if your auto has a starting pose)
+            self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
+            lambda speeds, feedforwards: self.driveRobotRelative(speeds), # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
+            PPHolonomicDriveController( # PPHolonomicController is the built in path following controller for holonomic drive trains
+                PIDConstants(5.0, 0.0, 0.0), # Translation PID constants
+                PIDConstants(5.0, 0.0, 0.0) # Rotation PID constants
+            ),
+            config, # The robot configuration
+            self.shouldFlipPath, # Supplier to control path flipping based on alliance color
+            self # Reference to this subsystem to set requirements
+        )
+        
+    def shouldFlipPath():
+        # Boolean supplier that controls when the path will be mirrored for the red alliance
+        # This will flip the path being followed to the red side of the field.
+        # THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+        return DriverStation.getAlliance() == DriverStation.Alliance.kRed
+        
     def publishStates(self):
         self.OdometryPublisher = NetworkTableInstance.getDefault().getStructTopic("/SwerveStates/Odometry", Pose2d).publish()
         self.RedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Red", SwerveModuleState).publish()
@@ -50,15 +80,23 @@ class SwerveDrive:
     def getHeading(self) -> Rotation2d:
         return Rotation2d.fromDegrees(self.gyro.get_yaw().value_as_double)
     
-    def getModuleStates(self):
+    def getModuleStates(self) -> list[SwerveModuleState]:
         return [self.moduleFL.getState(), self.moduleFR.getState(), self.moduleRL.getState(), self.moduleRR.getState()]
     
-    def getModulePositions(self):
+    def getModulePositions(self) -> list[SwerveModulePosition]:
         return [self.moduleFL.getPosition(), self.moduleFR.getPosition(), self.moduleRL.getPosition(), self.moduleRR.getPosition()]
     
     def zeroHeading(self):
         self.gyro.set_yaw(0)
-        self.odometry.resetPosition(self.getHeading(), self.getModulePositions(), Pose2d())
+        
+    def resetPose(self, pose = Pose2d()):
+        self.odometry.resetPosition(self.getHeading(), self.getModulePositions(), pose)
+        
+    def getPose(self) -> Pose2d:
+        return self.odometry.getEstimatedPosition()
+    
+    def getRobotRelativeSpeeds(self) -> ChassisSpeeds:
+        return c.kinematics.toChassisSpeeds(self.getModuleStates())
         
     def resetEncoders(self):
         self.moduleFL.resetEncoders()
@@ -85,13 +123,14 @@ class SwerveDrive:
         if len(self.controlArray) <= 100000:
             self.controlArray.append((self.lastDesiredSpeedFL, self.moduleFL.drivingEncoder.getVelocity()))
         self.lastDesiredSpeedFL = desiredStates[0].speed
-
-
         
     def driveFieldRelative(self, chassisSpeeds: ChassisSpeeds):
-
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, self.getHeading())
         moduleStates = c.kinematics.toSwerveModuleStates(speeds)
+        self.setModuleStates(moduleStates)
+        
+    def driveRobotRelative(self, chassisSpeeds: ChassisSpeeds):
+        moduleStates = c.kinematics.toSwerveModuleStates(chassisSpeeds)
         self.setModuleStates(moduleStates)
         
     def setX(self):
