@@ -4,6 +4,7 @@ from phoenix6.hardware import Pigeon2
 from wpimath.kinematics import ChassisSpeeds, SwerveModuleState, SwerveModulePosition
 from wpimath.estimator import SwerveDrive4PoseEstimator
 from wpimath.geometry import Rotation2d, Pose2d
+from wpilib import Timer
 from ntcore import NetworkTableInstance
 
 # from pathplannerlib.auto import AutoBuilder
@@ -16,10 +17,14 @@ class SwerveDrive:
         self.moduleFR = SwerveModule(c.FRDrivingCAN, c.FRTurningCAN, c.FREncoderCAN, False, False)
         self.moduleRL = SwerveModule(c.RLDrivingCAN, c.RLTurningCAN, c.RLEncoderCAN, False, False)
         self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, False, False)
+        
+        self.pidTimer = Timer()
 
         #
         self.lastDesiredSpeedFL = 0
-        self.controlArray = []
+        self.inputArray = []
+        self.outputArray = []
+        self.timeArray = []
         
         self.swerveModuleArray = [self.moduleFL, self.moduleFR, self.moduleRL, self.moduleRR]
         
@@ -43,6 +48,10 @@ class SwerveDrive:
         self.OdometryPublisher = NetworkTableInstance.getDefault().getStructTopic("/SwerveStates/Odometry", Pose2d).publish()
         self.RedPublisher = NetworkTableInstance.getDefault().getStructArrayTopic("/SwerveStates/Red", SwerveModuleState).publish()
 
+        self.timePublisher = NetworkTableInstance.getDefault().getFloatArrayTopic("/AutoPid/Times").publish()
+        self.inputPublisher = NetworkTableInstance.getDefault().getFloatArrayTopic("/AutoPid/Input").publish()
+        self.outputPublisher = NetworkTableInstance.getDefault().getFloatArrayTopic("/AutoPid/Output").publish()
+
     def updateStates(self):
         self.RedPublisher.set(self.getModuleStates())
         self.OdometryPublisher.set(self.odometry.getEstimatedPosition())
@@ -65,9 +74,11 @@ class SwerveDrive:
         self.moduleFR.resetEncoders()
         self.moduleRL.resetEncoders()
         self.moduleRR.resetEncoders()
+
+    def startAutopidTimer(self):
+        self.pidTimer.start()
         
     def setModuleStates(self, desiredStates: tuple[SwerveModuleState]):
-        desiredStates = c.kinematics.desaturateWheelSpeeds(desiredStates, c.MaxSpeed)
         self.moduleFL.setDesiredState(desiredStates[0])
         self.moduleFR.setDesiredState(desiredStates[1])
         self.moduleRL.setDesiredState(desiredStates[2])
@@ -82,9 +93,14 @@ class SwerveDrive:
             )
         )
         self.updateStates()
-        if len(self.controlArray) <= 100000:
-            self.controlArray.append((self.lastDesiredSpeedFL, self.moduleFL.drivingEncoder.getVelocity()))
-        self.lastDesiredSpeedFL = desiredStates[0].speed
+        if len(self.timeArray) <= 100000:
+            self.timeArray.append(self.pidTimer.get())
+            self.inputArray.append(desiredStates[0].speed)
+            self.outputArray.append(self.moduleFL.getState().speed)
+
+            self.timePublisher.set(self.timeArray)
+            self.inputPublisher.set(self.inputArray)
+            self.outputPublisher.set(self.outputArray)
 
 
         
