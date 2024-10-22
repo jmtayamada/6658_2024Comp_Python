@@ -9,6 +9,8 @@ from math import pow
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.path import PathPlannerPath
 
+from commands2.command import Command
+
 
 class Robot(TimedRobot):
 
@@ -43,8 +45,14 @@ class Robot(TimedRobot):
     def testPeriodic(self) -> None:
         pass
     
+    def autonomousInit(self):
+        return super().autonomousInit()
+    
+    def autonomousPeriodic(self):
+        pass
+    
     def getAutonomousCommand(self):
        return self.autoChooser.getSelected()
    
-    def getAutonomousPathFollow(self):
+    def getAutonomousPathFollow(self) -> Command:
         return AutoBuilder.followPath(PathPlannerPath.fromPathFile("Example Path"))
