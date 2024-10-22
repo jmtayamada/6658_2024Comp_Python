@@ -23,6 +23,9 @@ class Robot(TimedRobot):
     
     def robotInit(self) -> None:
         
+        self.drive = SwerveDrive()
+        self.driveStick = Joystick(c.joystickID)
+
         # Build an auto chooser. This will use Commands.none() as the default option.
         self.autoChooser = AutoBuilder.buildAutoChooser()
 
@@ -30,9 +33,6 @@ class Robot(TimedRobot):
         # self.autoChooser = AutoBuilder.buildAutoChooser("My Default Auto")
 
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
-        
-        self.drive = SwerveDrive()
-        self.driveStick = Joystick(c.joystickID)
         
     def teleopPeriodic(self) -> None:
         self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadbanded(1), -self.getJoystickDeadbanded(0), -self.getJoystickDeadbanded(4)))
