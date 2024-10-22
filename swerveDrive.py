@@ -9,7 +9,7 @@ from wpilib import DriverStation
 
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.controller import PPHolonomicDriveController
-from pathplannerlib.config import RobotConfig, PIDConstants
+from pathplannerlib.config import PIDConstants, RobotConfig
 
 # from pathplannerlib.auto import AutoBuilder
 # from pathplannerlib.config import ReplanningConfig, HolonomicPathFollowerConfig, PIDConstants
