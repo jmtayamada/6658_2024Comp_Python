@@ -47,7 +47,7 @@ class Robot(TimedRobot):
     
     def autonomousInit(self):
         auto_command = self.getAutonomousCommand()
-        if (auto_command == None | auto_command.isScheduled()):
+        if auto_command == None or auto_command.isScheduled():
             return None
         auto_command.schedule()
         
