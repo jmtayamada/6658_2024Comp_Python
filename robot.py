@@ -19,11 +19,17 @@ class Robot(TimedRobot):
     def robotInit(self) -> None:
         self.drive = SwerveDrive()
         self.driveStick = Joystick(c.joystickID)
+
+    def teleopInit(self) -> None:
+        self.drive.startAutopidTimer()
         
     def teleopPeriodic(self) -> None:
         self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadbanded(1), -self.getJoystickDeadbanded(0), -self.getJoystickDeadbanded(4)))
         if self.driveStick.getRawButtonPressed(1):
             self.drive.zeroHeading()
+    
+    def disabledInit(self) -> None:
+        self.drive.stopAutopidTimer()
         
     def testInit(self) -> None:
         pass

@@ -77,6 +77,9 @@ class SwerveDrive:
 
     def startAutopidTimer(self):
         self.pidTimer.start()
+    
+    def stopAutopidTimer(self):
+        self.pidTimer.stop()
         
     def setModuleStates(self, desiredStates: tuple[SwerveModuleState]):
         self.moduleFL.setDesiredState(desiredStates[0])
