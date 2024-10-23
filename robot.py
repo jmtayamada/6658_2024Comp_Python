@@ -4,16 +4,18 @@ from constants import robotConstants as c
 from wpimath.kinematics import ChassisSpeeds
 
 from constants import DriveConstants as d
-from math import pow
+from math import copysign
 
 class Robot(TimedRobot):
 
 
-    def getJoystickDeadbanded(self, axis: int) -> float:
+    def getJoystickDeadband(self, axis: int) -> float:
         rawAxis = self.driveStick.getRawAxis(axis)
         if(abs(rawAxis) <= d.deadband):
             return 0
         else:
+            rawAxis -= d.deadband * copysign(1, rawAxis)
+            rawAxis *= 1/(1-d.deadband)
             return rawAxis
     
     def robotInit(self) -> None:
@@ -21,7 +23,7 @@ class Robot(TimedRobot):
         self.driveStick = Joystick(c.joystickID)
         
     def teleopPeriodic(self) -> None:
-        self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadbanded(1), -self.getJoystickDeadbanded(0), -self.getJoystickDeadbanded(4)))
+        self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1), -self.getJoystickDeadband(0), -self.getJoystickDeadband(4)))
         if self.driveStick.getRawButtonPressed(1):
             self.drive.zeroHeading()
         
