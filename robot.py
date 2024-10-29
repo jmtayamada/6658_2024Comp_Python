@@ -46,10 +46,9 @@ class Robot(TimedRobot):
         pass
     
     def autonomousInit(self):
-        auto_command = self.getAutonomousCommand()
-        if auto_command == None or auto_command.isScheduled():
-            return None
-        auto_command.schedule()
+        self.auto_command = self.getAutonomousCommand()
+        if self.auto_command:
+            self.auto_command.schedule()
         
     
     def autonomousPeriodic(self):
