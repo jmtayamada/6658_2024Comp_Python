@@ -1,4 +1,4 @@
-from wpilib import TimedRobot, Joystick, SmartDashboard
+from wpilib import Joystick, SmartDashboard
 from swerveDrive import SwerveDrive
 from constants import robotConstants as c
 from wpimath.kinematics import ChassisSpeeds
@@ -10,9 +10,13 @@ from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.path import PathPlannerPath
 
 from commands2.command import Command
+from commands2 import TimedCommandRobot
+import typing
 
 
-class Robot(TimedRobot):
+class Robot(TimedCommandRobot):
+
+    autonomousCommand: typing.Optional[Command] = None
 
     def getJoystickDeadbanded(self, axis: int) -> float:
         rawAxis = self.driveStick.getRawAxis(axis)
@@ -46,10 +50,13 @@ class Robot(TimedRobot):
         pass
     
     def autonomousInit(self):
-        self.auto_command = self.getAutonomousCommand()
-        if self.auto_command:
-            self.auto_command.schedule()
+        self.autonomousCommand = self.getAutonomousCommand()
+        if self.autonomousCommand:
+            self.autonomousCommand.schedule()
         
+    def teleopInit(self) -> None:
+        if self.autonomousCommand:
+            self.autonomousCommand.cancel()
     
     def autonomousPeriodic(self):
         pass
