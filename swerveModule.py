@@ -32,6 +32,7 @@ class SwerveModule:
         self.drivingEncoder.setPositionConversionFactor(c.drivingPosFactor)
         self.drivingEncoder.setVelocityConversionFactor(c.drivingVelFactor)
         self.drivingEncoder.setPosition(0.0)
+        self.drivingEncoder.setMeasurementPeriod(16)
         self.turningEncoder = CANcoder(encoderNum)
         
         self.drivingPIDController = PIDController(c.drivingP, c.drivingI, c.drivingD)
