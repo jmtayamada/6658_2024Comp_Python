@@ -4,6 +4,9 @@ from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 from constants import SwerveModuleConstants as c
+from wpimath.system.plant import LinearSystemId
+from wpimath.estimator import KalmanFilter_1_1_1
+from wpimath.system import LinearSystemLoop_1_1_1
 
 class SwerveModule:
     
@@ -29,7 +32,16 @@ class SwerveModule:
         self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(c.drivingS, c.drivingV, c.drivingA)
         self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
-                
+        
+        # Kalman filter
+        # self.drivingPlant = LinearSystemId.identifyVelocitySystemMeters(c.drivingV, c.drivingA)
+        # self.observer = KalmanFilter_1_1_1(
+        #     self.drivingPlant,
+        #     [3],  # How accurate we think our model is
+        #     [0.01],  # How accurate we think our encoder data is
+        #     0.020,
+        # )
+        
         # self.driveReversal = reversedDrive
         
     def getCurrentRotation(self) -> Rotation2d:
@@ -56,7 +68,16 @@ class SwerveModule:
             )
         )
 
+        # Kalman filter
+        # self.observer.correct([optimizedDesiredState.speed], [self.getState().speed])
+
         self.drivingSparkMax.set(
             self.drivingPIDController.calculate(self.getState().speed, optimizedDesiredState.speed) + 
             self.drivingFeedForwardController.calculate(optimizedDesiredState.speed)
         )
+        
+        # Kalman filter
+        # self.drivingSparkMax.set(
+        #     self.drivingPIDController.calculate(self.observer.predict([optimizedDesiredState.speed], 0.020), optimizedDesiredState.speed) + 
+        #     self.drivingFeedForwardController.calculate(optimizedDesiredState.speed)
+        # )
