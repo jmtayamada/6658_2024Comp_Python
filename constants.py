@@ -13,9 +13,11 @@ class SwerveModuleConstants():
     drivingVelFactor = drivingPosFactor / 60.0  # meters per second
     turnEncoderMin = 0.0
     turnEncoderMax = 2 * pi
-    drivingP = .04
-    drivingI = 0
-    drivingD = .008
+    # drivingP = .04
+    # drivingI = 0
+    # drivingD = .008
+    drivingKv = 0
+    drivingKa = 0
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     drivingIdleMode = CSB.IdleMode.kBrake

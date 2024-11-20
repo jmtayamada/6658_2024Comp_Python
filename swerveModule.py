@@ -1,9 +1,14 @@
-from rev import RelativeEncoder, CANSparkMax, CANSparkLowLevel
+from rev import CANSparkMax, CANSparkLowLevel
 from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from wpimath.controller import PIDController
 from constants import SwerveModuleConstants as c
+
+from wpimath.system.plant import LinearSystemId
+from wpimath.estimator import KalmanFilter_1_1_1
+from wpimath.controller import LinearQuadraticRegulator_1_1
+from wpimath.system import LinearSystemLoop_1_1_1
 
 class SwerveModule:
     
@@ -23,15 +28,40 @@ class SwerveModule:
         self.drivingEncoder.setPositionConversionFactor(c.drivingPosFactor)
         self.drivingEncoder.setVelocityConversionFactor(c.drivingVelFactor)
         self.drivingEncoder.setPosition(0.0)
+        self.drivingEncoder.setMeasurementPeriod(16)
         self.turningEncoder = CANcoder(encoderNum)
         
-        self.drivingPIDController = PIDController(c.drivingP, c.drivingI, c.drivingD)
+        # self.drivingPIDController = PIDController(c.drivingP, c.drivingI, c.drivingD)
+        self.drivingPlant = LinearSystemId.identifyVelocitySystemMeters(c.drivingKv, c.drivingKa)
+        self.drivingObserver = KalmanFilter_1_1_1(
+            self.drivingPlant, 
+            [3],
+            [0.01],
+            0.020
+        )
+        self.drivingController = LinearQuadraticRegulator_1_1(
+            self.drivingPlant,
+            [8],
+            [12],
+            0.020
+        )
+        self.drivingLoop = LinearSystemLoop_1_1_1(
+            self.drivingPlant,
+            self.drivingController,
+            self.drivingObserver,
+            12.0,
+            0.020
+        )
+        
         self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
         
         self.drivingMotorOutput = 0
         
         # self.driveReversal = reversedDrive
+        
+    def teleopInit(self) -> None:
+        self.drivingLoop.reset([self.getState().speed])
         
     def getCurrentRotation(self) -> Rotation2d:
         return Rotation2d.fromRotations(self.turningEncoder.get_absolute_position().value_as_double)
@@ -57,13 +87,11 @@ class SwerveModule:
             )
         )
 
-        self.drivingMotorOutput += self.drivingPIDController.calculate(
-            self.getState().speed,
-            optimizedDesiredState.speed
-        )
-        if self.drivingMotorOutput > 1:
-            self.drivingMotorOutput = 1
-        if self.drivingMotorOutput < -1:
-            self.drivingMotorOutput = -1
-        self.drivingSparkMax.set(self.drivingMotorOutput)
+        self.drivingLoop.setNextR([optimizedDesiredState.speed])
+        
+        self.drivingLoop.correct([self.getState().speed])
+        
+        self.drivingLoop.predict(0.020)
+        
+        self.drivingSparkMax.setVoltage(self.drivingLoop.U())
 
