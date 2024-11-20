@@ -94,4 +94,3 @@ class SwerveModule:
         self.drivingLoop.predict(0.020)
         
         self.drivingSparkMax.setVoltage(self.drivingLoop.U())
-
