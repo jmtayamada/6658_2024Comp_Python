@@ -64,3 +64,6 @@ class IntakeConstants():
 
 class robotConstants():
     joystickID = 0
+
+class visionConstants():
+    cameraName = "rock"
