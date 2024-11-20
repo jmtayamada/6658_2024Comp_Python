@@ -2,7 +2,7 @@ from rev import RelativeEncoder, CANSparkMax, CANSparkLowLevel
 from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
-from wpimath.controller import PIDController
+from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 from constants import SwerveModuleConstants as c
 
 class SwerveModule:
@@ -26,11 +26,10 @@ class SwerveModule:
         self.turningEncoder = CANcoder(encoderNum)
         
         self.drivingPIDController = PIDController(c.drivingP, c.drivingI, c.drivingD)
+        self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(c.drivingS, c.drivingV, c.drivingA)
         self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
-        
-        self.drivingMotorOutput = 0
-        
+                
         # self.driveReversal = reversedDrive
         
     def getCurrentRotation(self) -> Rotation2d:
@@ -57,13 +56,7 @@ class SwerveModule:
             )
         )
 
-        self.drivingMotorOutput += self.drivingPIDController.calculate(
-            self.getState().speed,
-            optimizedDesiredState.speed
+        self.drivingSparkMax.set(
+            self.drivingPIDController.calculate(self.getState().speed, optimizedDesiredState.speed) + 
+            self.drivingFeedForwardController.calculate(optimizedDesiredState.speed)
         )
-        if self.drivingMotorOutput > 1:
-            self.drivingMotorOutput = 1
-        if self.drivingMotorOutput < -1:
-            self.drivingMotorOutput = -1
-        self.drivingSparkMax.set(self.drivingMotorOutput)
-
