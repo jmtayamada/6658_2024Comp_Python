@@ -10,8 +10,16 @@ from wpilib import DriverStation
 from pathplannerlib.auto import AutoBuilder
 # from pathplannerlib.controller import PPHolonomicDriveController
 from pathplannerlib.config import HolonomicPathFollowerConfig, PIDConstants, ReplanningConfig
+import numpy as np
 
-class SwerveDrive:
+class Singleton(type):
+    _instances = {}
+    def __call__(cls, *args, **kwargs):
+        if cls not in cls._instances:
+            cls._instances[cls] = super(Singleton, cls).__call__(*args, **kwargs)
+        return cls._instances[cls]
+
+class SwerveDrive(metaclass=Singleton):
     
     def __init__(self) -> None:
         self.moduleFL = SwerveModule(c.FLDrivingCAN, c.FLTurningCAN, c.FLEncoderCAN, True, False)
@@ -19,7 +27,6 @@ class SwerveDrive:
         self.moduleRL = SwerveModule(c.RLDrivingCAN, c.RLTurningCAN, c.RLEncoderCAN, False, False)
         self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, False, False)
 
-        #
         self.lastDesiredSpeedFL = 0
         self.controlArray = []
         
@@ -152,4 +159,13 @@ class SwerveDrive:
         self.moduleFR.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(-45)))
         self.moduleRL.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(-45)))
         self.moduleRR.setDesiredState(SwerveModuleState(0, Rotation2d.fromDegrees(45)))
+        
+    def voltageTuning(self, voltage) -> float:
+        voltages = [
+            self.moduleFL.voltageControl(voltage),
+            self.moduleFR.voltageControl(voltage),
+            self.moduleRL.voltageControl(voltage),
+            self.moduleRR.voltageControl(voltage)
+        ]
+        return np.average(voltages)
         
