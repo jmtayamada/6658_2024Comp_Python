@@ -19,9 +19,6 @@ class SwerveDrive():
         self.moduleFR = SwerveModule(c.FRDrivingCAN, c.FRTurningCAN, c.FREncoderCAN, False, False)
         self.moduleRL = SwerveModule(c.RLDrivingCAN, c.RLTurningCAN, c.RLEncoderCAN, False, False)
         self.moduleRR = SwerveModule(c.RRDrivingCAN, c.RRTurningCAN, c.RREncoderCAN, False, False)
-
-        self.lastDesiredSpeedFL = 0
-        self.controlArray = []
         
         self.swerveModuleArray = [self.moduleFL, self.moduleFR, self.moduleRL, self.moduleRR]
         
@@ -134,8 +131,6 @@ class SwerveDrive():
             )
         )
         self.updateStates()
-        if len(self.controlArray) <= 100000:
-            self.controlArray.append((self.lastDesiredSpeedFL, self.moduleFL.drivingEncoder.getVelocity()))
         self.lastDesiredSpeedFL = desiredStates[0].speed
         
     def driveFieldRelative(self, chassisSpeeds: ChassisSpeeds):
