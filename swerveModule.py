@@ -70,4 +70,3 @@ class SwerveModule:
     def voltageControl(self, voltage: float) -> float:
         self.drivingSparkMax.setVoltage(voltage)
         return self.getState().speed
-

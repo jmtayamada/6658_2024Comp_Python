@@ -60,36 +60,32 @@ class Robot(TimedCommandRobot):
         self.timer.reset()
         
     def testPeriodic(self) -> None:
-        currentTime = self.timer.get()
-        
         if self.step_num == 0:
             if self.switch == False:
                 self.switch = True
                 self.timer.start()
-            if self.quasitasticTesting(self.drive, currentTime, True, self.quasitasticForward):
-                self.step_num == 1
+            if self.dynamicTesting(self.drive, self.timer.get(), True, self.dynamicForward):
+                self.step_num = 1
         
         elif self.step_num == 1:
             if self.switch == True:
                 self.switch = False
                 self.timer.restart()
-                
-            if self.quasitasticTesting(self.drive, currentTime, False, self.quasitasticBackward):
-                self.step_num == 2
+            if self.dynamicTesting(self.drive, self.timer.get(), False, self.dynamicBackward):
+                self.step_num = 2
         
         elif self.step_num == 2:
             if self.switch == False:
                 self.switch = True
                 self.timer.restart()
-            
-            if self.dynamicTesting(self.drive, currentTime, True, self.dynamicForward):
-                self.step_num == 3
+            if self.quasitasticTesting(self.drive, self.timer.get(), True, self.quasitasticForward):
+                self.step_num = 3
         
         elif self.step_num == 3:
             if self.switch == True:
                 self.switch = False
                 self.timer.restart()
-            self.dynamicTesting(self.drive, currentTime, False, self.dynamicBackward)
+            self.quasitasticTesting(self.drive, self.timer.get(), False, self.quasitasticBackward)
                 
     def quasitasticTesting(self, drive: SwerveDrive, time: float, forward: bool, logList: list[list, list, list]) -> bool:
         if time < 2:
@@ -104,15 +100,15 @@ class Robot(TimedCommandRobot):
             return True
     
     def dynamicTesting(self, drive: SwerveDrive, time: float, forward: bool, logList: list[list, list, list]) -> bool:
-        if time < 12:
+        if time < 8:
             logList[0].append(time)
             logList[1].append(2 * (forward - .5) * time)
             logList[2].append(drive.voltageTuning(2 * (forward - .5) * time))
             return False
-        if time > 12 and time < 14:
+        if time > 8 and time < 10:
             drive.voltageTuning(0)
             return False
-        if time > 14:
+        if time > 10:
             return True
                 
     def testExit(self):
