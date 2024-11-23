@@ -138,7 +138,6 @@ class SwerveDrive(metaclass=Singleton):
             )
         )
         self.updateStates()
-        self.lastDesiredSpeedFL = desiredStates[0].speed
         
     def driveFieldRelative(self, chassisSpeeds: ChassisSpeeds):
         speeds = ChassisSpeeds.fromFieldRelativeSpeeds(chassisSpeeds, self.getHeading())
