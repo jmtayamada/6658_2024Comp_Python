@@ -68,6 +68,8 @@ class SwerveModule:
         if self.drivingMotorOutput < -1:
             self.drivingMotorOutput = -1
         self.drivingSparkMax.set(self.drivingMotorOutput)
+        
+        self.savedAngle = self.getState().angle.radians()
 
     def resetRotation(self) -> bool:
         self.turningSparkMax.set(
@@ -79,7 +81,7 @@ class SwerveModule:
         return self.getCurrentRotation().radians() == 0
     
     def saveAngle(self) -> None:
-        self.savedAngle = self.getState().angle
+        self.savedAngle = self.getState().angle.radians()
         
     def voltageControl(self, voltage: float) -> float:
         self.turningSparkMax.set(
@@ -90,3 +92,12 @@ class SwerveModule:
         )
         self.drivingSparkMax.setVoltage(2 * (self.driveReversal - .5) * voltage)
         return self.getState().speed
+    
+    def rotateModule(self, angleChange):
+        self.savedAngle += angleChange
+        self.turningSparkMax.set(
+            -self.turningPIDController.calculate(
+                self.getCurrentRotation().radians(), 
+                self.savedAngle
+            )
+        )

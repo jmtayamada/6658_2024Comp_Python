@@ -4,7 +4,7 @@ from constants import robotConstants as c
 from wpimath.kinematics import ChassisSpeeds
 
 from constants import DriveConstants as d
-from math import copysign
+from math import copysign, pi
 
 from pathplannerlib.auto import AutoBuilder
 from pathplannerlib.path import PathPlannerPath
@@ -54,6 +54,16 @@ class Robot(TimedCommandRobot):
         self.resetRotation = False
         
     def teleopPeriodic(self) -> None:
+        if self.driveStick.getRawButton(6): # switch to left shoulder button
+            if self.driveStick.getRawButton(0):
+                self.drive.moduleFL.rotateModule(-self.getJoystickDeadband(0)*2*pi/50)
+            elif self.driveStick.getRawButton(1):
+                self.drive.moduleFR.rotateModule(-self.getJoystickDeadband(0)*2*pi/50)
+            elif self.driveStick.getRawButton(2):
+                self.drive.moduleRL.rotateModule(-self.getJoystickDeadband(0)*2*pi/50)
+            elif self.driveStick.getRawButton(3):
+                self.drive.moduleRR.rotateModule(-self.getJoystickDeadband(0)*2*pi/50)
+            return
         if self.driveStick.getRawButton(7):
             self.drive.resetRotation()
         self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1), -self.getJoystickDeadband(0), -self.getJoystickDeadband(4)))
