@@ -100,22 +100,22 @@ class Robot(TimedCommandRobot):
             return True
     
     def dynamicTesting(self, drive: SwerveDrive, time: float, forward: bool, logList: list[list, list, list]) -> bool:
-        if time < 8:
+        if time < 6:
             logList[0].append(time)
             logList[1].append(2 * (forward - .5) * time)
             logList[2].append(drive.voltageTuning(2 * (forward - .5) * time))
             return False
-        if time > 8 and time < 10:
+        if time > 6 and time < 8:
             drive.voltageTuning(0)
             return False
-        if time > 10:
+        if time > 8:
             return True
                 
     def testExit(self):
-        np.savetxt("/U/logs/quasitasticForward.txt", np.asarray(self.quasitasticForward), delimiter=", ")
-        np.savetxt("/U/logs/quasitasticBackward.txt", np.asarray(self.quasitasticBackward), delimiter=", ")
-        np.savetxt("/U/logs/dynamicForward.txt", np.asarray(self.dynamicForward), delimiter=", ")
-        np.savetxt("/U/logs/dynamicBackward.txt", np.asarray(self.dynamicBackward), delimiter=", ")
+        np.savetxt("/media/sda1/quasitasticForward.txt", np.asarray(self.quasitasticForward), delimiter=", ")
+        np.savetxt("/media/sda1/quasitasticBackward.txt", np.asarray(self.quasitasticBackward), delimiter=", ")
+        np.savetxt("/media/sda1/dynamicForward.txt", np.asarray(self.dynamicForward), delimiter=", ")
+        np.savetxt("/media/sda1/dynamicBackward.txt", np.asarray(self.dynamicBackward), delimiter=", ")
     
     def autonomousInit(self):
         self.autonomousCommand = self.getAutonomousCommand()
