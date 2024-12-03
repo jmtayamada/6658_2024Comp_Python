@@ -71,4 +71,3 @@ class SwerveModule:
         self.turningSparkMax.set(0)
         self.drivingSparkMax.setVoltage(2 * (self.driveReversal - .5) * voltage)
         return self.getState().speed
-
