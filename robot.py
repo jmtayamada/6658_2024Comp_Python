@@ -46,10 +46,10 @@ class Robot(TimedCommandRobot):
         self.timer = Timer()
         self.step_num = 0
         self.switch = False
-        self.quasitasticForward = [[], [], []]  # time, voltage, velocity
-        self.quasitasticBackward = [[], [], []]
-        self.dynamicForward = [[], [], []]
-        self.dynamicBackward = [[], [], []]
+        self.quasitasticForward = []  # time, voltage, velocity
+        self.quasitasticBackward = []
+        self.dynamicForward = []
+        self.dynamicBackward = []
 
         self.resetRotation = False
         
@@ -93,9 +93,10 @@ class Robot(TimedCommandRobot):
                 
     def quasitasticTesting(self, drive: SwerveDrive, time: float, forward: bool, logList: list[list, list, list]) -> bool:
         if time < 2:
-            logList[0].append(time)
-            logList[1].append(2 * (forward - .5) * 12)
-            logList[2].append(drive.voltageTuning(2 * (forward - .5) * 12))
+            logList.append((time, 2 * (forward - .5) * 12, drive.voltageTuning(2 * (forward - .5) * 12)))
+            # logList[0].append(time)
+            # logList[1].append(2 * (forward - .5) * 12)
+            # logList[2].append(drive.voltageTuning(2 * (forward - .5) * 12))
             return False
         if time > 2 and time < 4:
             drive.voltageTuning(0)
@@ -105,9 +106,10 @@ class Robot(TimedCommandRobot):
     
     def dynamicTesting(self, drive: SwerveDrive, time: float, forward: bool, logList: list[list, list, list]) -> bool:
         if time < 6:
-            logList[0].append(time)
-            logList[1].append(2 * (forward - .5) * time)
-            logList[2].append(drive.voltageTuning(2 * (forward - .5) * time))
+            logList.append(time, 2 * (forward - .5) * time, drive.voltageTuning(2 * (forward - .5) * time))
+            # logList[0].append(time)
+            # logList[1].append(2 * (forward - .5) * time)
+            # logList[2].append(drive.voltageTuning(2 * (forward - .5) * time))
             return False
         if time > 6 and time < 8:
             drive.voltageTuning(0)
@@ -116,10 +118,10 @@ class Robot(TimedCommandRobot):
             return True
                 
     def testExit(self):
-        np.savetxt("/media/sda1/quasitasticForward.txt", np.swapaxes(np.asarray(self.quasitasticForward), 0, 1), delimiter=", ")
-        np.savetxt("/media/sda1/quasitasticBackward.txt", np.swapaxes(np.asarray(self.quasitasticBackward), 0, 1), delimiter=", ")
-        np.savetxt("/media/sda1/dynamicForward.txt", np.swapaxes(np.asarray(self.dynamicForward), 0, 1), delimiter=", ")
-        np.savetxt("/media/sda1/dynamicBackward.txt", np.swapaxes(np.asarray(self.dynamicBackward), 0, 1), delimiter=", ")
+        np.savetxt("/media/sda1/quasitasticForward.txt", np.asarray(self.quasitasticForward), delimiter=", ")
+        np.savetxt("/media/sda1/quasitasticBackward.txt", np.asarray(self.quasitasticBackward), delimiter=", ")
+        np.savetxt("/media/sda1/dynamicForward.txt", np.asarray(self.dynamicForward), delimiter=", ")
+        np.savetxt("/media/sda1/dynamicBackward.txt", np.asarray(self.dynamicBackward), delimiter=", ")
     
     def autonomousInit(self):
         self.autonomousCommand = self.getAutonomousCommand()
