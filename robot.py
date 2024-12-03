@@ -81,6 +81,7 @@ class Robot(TimedCommandRobot):
                 self.timer.start()
             if self.dynamicTesting(self.drive, self.timer.get(), True, self.dynamicForward):
                 self.step_num = 1
+            print("step 1")
         
         elif self.step_num == 1:
             if self.switch == True:
@@ -88,6 +89,7 @@ class Robot(TimedCommandRobot):
                 self.timer.restart()
             if self.dynamicTesting(self.drive, self.timer.get(), False, self.dynamicBackward):
                 self.step_num = 2
+            print("step 2")
         
         elif self.step_num == 2:
             if self.switch == False:
@@ -95,14 +97,16 @@ class Robot(TimedCommandRobot):
                 self.timer.restart()
             if self.quasitasticTesting(self.drive, self.timer.get(), True, self.quasitasticForward):
                 self.step_num = 3
+            print("step 3")
         
         elif self.step_num == 3:
             if self.switch == True:
                 self.switch = False
                 self.timer.restart()
             self.quasitasticTesting(self.drive, self.timer.get(), False, self.quasitasticBackward)
+            print("step 4")
                 
-    def quasitasticTesting(self, drive: SwerveDrive, time: float, forward: bool, logList: list[list, list, list]) -> bool:
+    def quasitasticTesting(self, drive: SwerveDrive, time: float, forward: bool, logList: list) -> bool:
         if time < 2:
             logList.append((time, 2 * (forward - .5) * 12, drive.voltageTuning(2 * (forward - .5) * 12)))
             # logList[0].append(time)
@@ -115,9 +119,9 @@ class Robot(TimedCommandRobot):
         if time > 4:
             return True
     
-    def dynamicTesting(self, drive: SwerveDrive, time: float, forward: bool, logList: list[list, list, list]) -> bool:
+    def dynamicTesting(self, drive: SwerveDrive, time: float, forward: bool, logList: list) -> bool:
         if time < 6:
-            logList.append(time, 2 * (forward - .5) * time, drive.voltageTuning(2 * (forward - .5) * time))
+            logList.append((time, 2 * (forward - .5) * time, drive.voltageTuning(2 * (forward - .5) * time)))
             # logList[0].append(time)
             # logList[1].append(2 * (forward - .5) * time)
             # logList[2].append(drive.voltageTuning(2 * (forward - .5) * time))
