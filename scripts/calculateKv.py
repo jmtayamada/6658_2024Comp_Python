@@ -10,6 +10,8 @@ with open('dynamicBackward.csv', newline="") as f:
     reader = csv.reader(f)
     data = list(reader)
 
+print(len(data))
+
 xs = [-float(i) for i in data[2]]
 ys = [float(i) for i in data[1]]
 
