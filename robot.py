@@ -116,10 +116,10 @@ class Robot(TimedCommandRobot):
             return True
                 
     def testExit(self):
-        np.savetxt("/media/sda1/quasitasticForward.txt", np.asarray(self.quasitasticForward), delimiter=", ")
-        np.savetxt("/media/sda1/quasitasticBackward.txt", np.asarray(self.quasitasticBackward), delimiter=", ")
-        np.savetxt("/media/sda1/dynamicForward.txt", np.asarray(self.dynamicForward), delimiter=", ")
-        np.savetxt("/media/sda1/dynamicBackward.txt", np.asarray(self.dynamicBackward), delimiter=", ")
+        np.savetxt("/media/sda1/quasitasticForward.txt", np.swapaxes(np.asarray(self.quasitasticForward), 0, 1), delimiter=", ")
+        np.savetxt("/media/sda1/quasitasticBackward.txt", np.swapaxes(np.asarray(self.quasitasticBackward), 0, 1), delimiter=", ")
+        np.savetxt("/media/sda1/dynamicForward.txt", np.swapaxes(np.asarray(self.dynamicForward), 0, 1), delimiter=", ")
+        np.savetxt("/media/sda1/dynamicBackward.txt", np.swapaxes(np.asarray(self.dynamicBackward), 0, 1), delimiter=", ")
     
     def autonomousInit(self):
         self.autonomousCommand = self.getAutonomousCommand()
