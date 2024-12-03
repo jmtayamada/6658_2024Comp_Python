@@ -50,8 +50,12 @@ class Robot(TimedCommandRobot):
         self.quasitasticBackward = [[], [], []]
         self.dynamicForward = [[], [], []]
         self.dynamicBackward = [[], [], []]
+
+        self.resetRotation = False
         
     def teleopPeriodic(self) -> None:
+        if self.driveStick.getRawButton(7):
+            self.drive.resetRotation()
         self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1), -self.getJoystickDeadband(0), -self.getJoystickDeadband(4)))
         if self.driveStick.getRawButtonPressed(1):
             self.drive.zeroHeading()

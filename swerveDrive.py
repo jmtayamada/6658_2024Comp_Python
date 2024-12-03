@@ -162,4 +162,9 @@ class SwerveDrive(metaclass=Singleton):
             self.moduleRR.voltageControl(voltage)
         ]
         return np.average(voltages)
+    
+    def resetRotation(self) -> bool:
+        if (self.moduleFL.resetRotation() and self.moduleFR.resetRotation() and self.moduleRL.resetRotation() and self.moduleRR.resetRotation()):
+            return True
+        return False
         
