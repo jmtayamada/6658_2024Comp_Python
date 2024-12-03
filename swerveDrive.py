@@ -167,4 +167,10 @@ class SwerveDrive(metaclass=Singleton):
         if (self.moduleFL.resetRotation() and self.moduleFR.resetRotation() and self.moduleRL.resetRotation() and self.moduleRR.resetRotation()):
             return True
         return False
+    
+    def saveModuleAngles(self) -> None:
+        self.moduleFL.saveAngle()
+        self.moduleFR.saveAngle()
+        self.moduleRL.saveAngle()
+        self.moduleRR.saveAngle()
         

@@ -61,6 +61,7 @@ class Robot(TimedCommandRobot):
             self.drive.zeroHeading()
         
     def testInit(self) -> None:
+        self.drive.saveModuleAngles()
         self.timer.reset()
         
     def testPeriodic(self) -> None:

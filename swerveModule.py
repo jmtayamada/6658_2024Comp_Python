@@ -33,6 +33,8 @@ class SwerveModule:
         
         self.driveReversal = reversedDrive
         
+        self.savedAngle = 0
+        
     def getCurrentRotation(self) -> Rotation2d:
         return Rotation2d.fromRotations(self.turningEncoder.get_absolute_position().value_as_double)
     
@@ -75,8 +77,16 @@ class SwerveModule:
             )
         )
         return self.getCurrentRotation().radians() == 0
+    
+    def saveAngle(self) -> None:
+        self.savedAngle = self.getState().angle
         
     def voltageControl(self, voltage: float) -> float:
-        self.turningSparkMax.set(0)
+        self.turningSparkMax.set(
+            -self.turningPIDController.calculate(
+                self.getCurrentRotation().radians(), 
+                self.savedAngle
+            )
+        )
         self.drivingSparkMax.setVoltage(2 * (self.driveReversal - .5) * voltage)
         return self.getState().speed
