@@ -4,15 +4,9 @@ from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
 from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 from constants import SwerveModuleConstants as c
-from wpimath.system.plant import LinearSystemId
-from wpimath.estimator import KalmanFilter_1_1_1
-from wpimath.system import LinearSystemLoop_1_1_1
-
-from commands2.sysid import SysIdRoutine
 from wpilib.sysid import SysIdRoutineLog
 from wpimath.units import volts
 from wpilib import RobotController
-from commands2 import Command
 
 class SwerveModule:
     
@@ -40,31 +34,8 @@ class SwerveModule:
         self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
         
-        # Kalman filter
-        # self.drivingPlant = LinearSystemId.identifyVelocitySystemMeters(c.drivingV, c.drivingA)
-        # self.observer = KalmanFilter_1_1_1(
-        #     self.drivingPlant,
-        #     [3],  # How accurate we think our model is
-        #     [0.01],  # How accurate we think our encoder data is
-        #     0.020,
-        # )
-        
         # self.driveReversal = reversedDrive
         
-        def voltageDrive(voltage: volts):
-            self.drivingSparkMax.setVoltage(volts)
-            
-        self.sys_id_routine = SysIdRoutine(
-            SysIdRoutine.Config(),
-            SysIdRoutine.Mechanism(voltageDrive, self.log, self),
-        )
-        
-    def sysIdQuasistatic(self, direction: SysIdRoutine.Direction) -> Command:
-        return self.sys_id_routine.quasistatic(direction)
-
-    def sysIdDynamic(self, direction: SysIdRoutine.Direction) -> Command:
-        return self.sys_id_routine.dynamic(direction)
-            
     def log(self, sys_id_routine: SysIdRoutineLog) -> None:
         sys_id_routine.motor("drive-motor").voltage(
             self.drivingSparkMax.get() * RobotController.getBatteryVoltage()
@@ -96,16 +67,7 @@ class SwerveModule:
             )
         )
 
-        # Kalman filter
-        # self.observer.correct([optimizedDesiredState.speed], [self.getState().speed])
-
         self.drivingSparkMax.set(
             self.drivingPIDController.calculate(self.getState().speed, optimizedDesiredState.speed) + 
             self.drivingFeedForwardController.calculate(optimizedDesiredState.speed)
         )
-        
-        # Kalman filter
-        # self.drivingSparkMax.set(
-        #     self.drivingPIDController.calculate(self.observer.predict([optimizedDesiredState.speed], 0.020), optimizedDesiredState.speed) + 
-        #     self.drivingFeedForwardController.calculate(optimizedDesiredState.speed)
-        # )
