@@ -67,3 +67,12 @@ class IntakeConstants():
 
 class robotConstants():
     joystickID = 0
+
+class PathPlannerConstants():
+    translationP = 2.00
+    translationI = 0
+    translationD = 0.1
+
+    rotationP = -2.00
+    rotationI = 0
+    rotationD = -0.05

@@ -1,5 +1,6 @@
 from swerveModule import SwerveModule
 from constants import DriveConstants as c
+from constants import PathPlannerConstants as p
 from phoenix6.hardware import Pigeon2
 from wpimath.kinematics import ChassisSpeeds, SwerveModuleState, SwerveModulePosition
 from wpimath.estimator import SwerveDrive4PoseEstimator
@@ -74,8 +75,8 @@ class SwerveDrive(metaclass=Singleton):
             self.getRobotRelativeSpeeds, # ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
             self.driveRobotRelative, # Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also outputs individual module feedforwards
             HolonomicPathFollowerConfig( # PPHolonomicController is the built in path following controller for holonomic drive trains
-                PIDConstants(5.0, 0.0, 0.0), # Translation PID constants
-                PIDConstants(5.0, 0.0, 0.0), # Rotation PID constants
+                PIDConstants(p.translationP, p.translationI, p.translationD), # Translation PID constants
+                PIDConstants(p.rotationP, p.rotationI, p.rotationD), # Rotation PID constants
                 1.0,
                 1.0,
                 ReplanningConfig()

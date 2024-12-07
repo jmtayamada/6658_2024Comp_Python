@@ -41,7 +41,7 @@ class Robot(TimedCommandRobot):
         SmartDashboard.putData("Auto Chooser", self.autoChooser)
         
     def teleopPeriodic(self) -> None:
-        self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1), -self.getJoystickDeadband(0), -self.getJoystickDeadband(4)))
+        self.drive.driveFieldRelative(ChassisSpeeds(-self.getJoystickDeadband(1)/2, -self.getJoystickDeadband(0)/2, -self.getJoystickDeadband(4)/2))
         if self.driveStick.getRawButtonPressed(1):
             self.drive.zeroHeading()
         
