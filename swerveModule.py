@@ -2,8 +2,11 @@ from rev import RelativeEncoder, CANSparkMax, CANSparkLowLevel
 from phoenix6.hardware import CANcoder
 from wpimath.geometry import Rotation2d
 from wpimath.kinematics import SwerveModuleState, SwerveModulePosition
-from wpimath.controller import PIDController
+from wpimath.controller import PIDController, SimpleMotorFeedforwardMeters
 from constants import SwerveModuleConstants as c
+from wpilib.sysid import SysIdRoutineLog
+from wpimath.units import volts
+from wpilib import RobotController
 
 class SwerveModule:
     
@@ -23,15 +26,22 @@ class SwerveModule:
         self.drivingEncoder.setPositionConversionFactor(c.drivingPosFactor)
         self.drivingEncoder.setVelocityConversionFactor(c.drivingVelFactor)
         self.drivingEncoder.setPosition(0.0)
+        self.drivingEncoder.setMeasurementPeriod(16)
         self.turningEncoder = CANcoder(encoderNum)
         
         self.drivingPIDController = PIDController(c.drivingP, c.drivingI, c.drivingD)
+        self.drivingFeedForwardController = SimpleMotorFeedforwardMeters(c.drivingS, c.drivingV, c.drivingA)
         self.turningPIDController = PIDController(c.turningP, c.turningI, c.turningD)
         self.turningPIDController.enableContinuousInput(c.turnEncoderMin, c.turnEncoderMax)
         
-        self.drivingMotorOutput = 0
-        
         # self.driveReversal = reversedDrive
+        
+    def log(self, sys_id_routine: SysIdRoutineLog) -> None:
+        sys_id_routine.motor("drive-motor").voltage(
+            self.drivingSparkMax.get() * RobotController.getBatteryVoltage()
+        ).position(self.getPosition().distance).velocity(
+            self.getState().speed
+        )
         
     def getCurrentRotation(self) -> Rotation2d:
         return Rotation2d.fromRotations(self.turningEncoder.get_absolute_position().value_as_double)
@@ -57,13 +67,7 @@ class SwerveModule:
             )
         )
 
-        self.drivingMotorOutput += self.drivingPIDController.calculate(
-            self.getState().speed,
-            optimizedDesiredState.speed
+        self.drivingSparkMax.set(
+            self.drivingPIDController.calculate(self.getState().speed, optimizedDesiredState.speed) + 
+            self.drivingFeedForwardController.calculate(optimizedDesiredState.speed)
         )
-        if self.drivingMotorOutput > 1:
-            self.drivingMotorOutput = 1
-        if self.drivingMotorOutput < -1:
-            self.drivingMotorOutput = -1
-        self.drivingSparkMax.set(self.drivingMotorOutput)
-

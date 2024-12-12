@@ -16,6 +16,9 @@ class SwerveModuleConstants():
     drivingP = .04
     drivingI = 0
     drivingD = .008
+    drivingS = 0
+    drivingV = 6.102634556313851
+    drivingA = 0
     drivingMinOutput = -1.0
     drivingMaxOutput = 1.0
     drivingIdleMode = CSB.IdleMode.kBrake
@@ -64,6 +67,15 @@ class IntakeConstants():
 
 class robotConstants():
     joystickID = 0
+
+class PathPlannerConstants():
+    translationP = 2.00
+    translationI = 0
+    translationD = -0.1
+
+    rotationP = -2.00
+    rotationI = 0
+    rotationD = 0.05
 
 class visionConstants():
     cameraName = "rock"
